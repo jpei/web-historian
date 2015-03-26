@@ -69,5 +69,5 @@ exports.readFromSites = function(callback){
 };
 
 exports.downloadUrls = function(urlArray){
-  
+  // helps htmlfetcher.js
 };

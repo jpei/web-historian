@@ -9,9 +9,6 @@ var getSite = function(pathName, response) { // from local storage
   // serve http-helpers.serveAssets
   // calls saveSite
 
-};
-
-var saveSite = function(request, response, callback) { // to local storage
   // Wait for POST data to be collected
 
     // is it in sites.txt?
@@ -22,25 +19,31 @@ var saveSite = function(request, response, callback) { // to local storage
           // if no
             // display loading page
       // if no
-        // append to sites.txt IN LOWER CASE
+        // append to sites.txt
+  if (pathName === '/') {
+    pathName = '/index.html';
+  }
+  if (pathName === '/index.html' || pathName === '/styles.css' || pathName === '/loading.html'){
+    httpHelpers.serveAssets(response, archive.paths.siteAssets+pathName, function(){});
+  } else {
+    //is it in file already
+    httpHelpers.serveAssets(response);
+  }
+
+};
+
+var saveSite = function(request, response, callback) { // to local storage
+  
 };
 
 exports.handleRequest = function (req, res) {
   // req.method, req.url
   //We want to check the request url and make sure it is correct.
-  var pathName = url.parse(req.url).pathname;
+  var pathName = url.parse(req.url).pathname.toLowerCase();
 
   if (req.method === "GET") {
-    var path = '/index.html';
-    if (pathName === path || pathName === '/'){
-      httpHelpers.serveAssets(res, archive.paths.siteAssets+'/index.html', function(){});
-    } else {
-      //is it in file already
-      //getSite(pathName, res);
-      httpHelpers.serveAssets(res);
-    }
+    getSite(pathName, res);
   } else if (req.method === "POST") {
     //foo
   }
-  //res.end(archive.paths.list);
 };
