@@ -2,48 +2,82 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var httpHelpers = require('./http-helpers');
 var url = require('url');
+var qs = require('querystring');
 // require more modules/folders here!
 
 var getSite = function(pathName, response) { // from local storage
-  // verify URL path
-  // serve http-helpers.serveAssets
-  // calls saveSite
-
-  // Wait for POST data to be collected
-
-    // is it in sites.txt?
-      // if yes
-        // is it archive?
-          // if yes
-            // display archived page
-          // if no
-            // display loading page
-      // if no
-        // append to sites.txt
-  if (pathName === '/') {
-    pathName = '/index.html';
+  if (pathName === '') {
+    pathName = 'index.html';
   }
-  if (pathName === '/index.html' || pathName === '/styles.css' || pathName === '/loading.html'){
-    httpHelpers.serveAssets(response, archive.paths.siteAssets+pathName, function(){});
+  if (pathName === 'index.html' || pathName === 'styles.css' || pathName === 'loading.html'){
+    httpHelpers.serveAssets(response, path.join(archive.paths.siteAssets, pathName));
   } else {
     //is it in file already
-    httpHelpers.serveAssets(response);
+    checkSitesAndArchive("GET", response, pathName, function() {
+      httpHelpers.serveAssets(response, null, 404); // 404
+    });
   }
-
 };
 
-var saveSite = function(request, response, callback) { // to local storage
-  
+var saveSite = function(request, response) { // to sites.txt
+  //Is site in archives/sites.txt?
+  var data = '';
+  request.on('data', function(buffer) {
+    data += buffer;
+  });
+  request.on('end', function() {
+    if (data.charAt(0)==='{'){
+      var dataObj = JSON.parse(data);
+    } else {
+      var dataObj = qs.parse(data);
+    }
+    var url = dataObj.url;
+    checkSitesAndArchive("POST", response, url, function(){
+      archive.addUrlToList(url, function() {
+        // return a response saying your request went through
+        httpHelpers.serveAssets(response, url, 302);
+      });
+    });
+  });
 };
+
+var checkSitesAndArchive = function(method, response, pathName, callback) {
+  archive.isUrlArchived(pathName, function(found) {
+    if (found) {
+      // if get, serve, if post, redirect
+      if (method==='GET') {
+        var filePath = path.join(archive.paths.archivedSites, pathName.replace(/\//g,'%2F')); 
+        httpHelpers.serveAssets(response, filePath);
+      } else {
+        httpHelpers.serveAssets(response, pathName, 302);
+      }
+    } else {
+      // is it in sites.txt?
+      archive.isUrlInList(pathName, function(found) {
+        if (found) {
+          console.log('url found in txt file');
+          // serve loading
+          if (method==='GET') {
+            httpHelpers.serveAssets(response, path.join(archive.paths.siteAssets, 'loading.html'));
+          }
+          else {
+            httpHelpers.serveAssets(response, pathName, 302);
+          }
+        } else {
+          callback();
+        }
+      });
+    }
+  });
+}
 
 exports.handleRequest = function (req, res) {
   // req.method, req.url
   //We want to check the request url and make sure it is correct.
-  var pathName = url.parse(req.url).pathname.toLowerCase();
-
   if (req.method === "GET") {
+    var pathName = url.parse(req.url).pathname.toLowerCase().substr(1);
     getSite(pathName, res);
   } else if (req.method === "POST") {
-    //foo
+    saveSite(req, res);
   }
 };

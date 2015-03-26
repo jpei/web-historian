@@ -135,6 +135,9 @@ describe("archive helpers", function(){
         if (++counter == total) { done() }
       });
     });
+    after(function() {
+      fs.unlinkSync(archive.paths.archivedSites + "/www.example.com");
+    })
   });
 
   describe("#downloadUrls", function () {
