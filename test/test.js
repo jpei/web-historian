@@ -149,8 +149,12 @@ describe("archive helpers", function(){
       setTimeout(function () {
         expect(fs.readdirSync(archive.paths.archivedSites)).to.deep.equal(urlArray);
         done();
-      }, 25);
+      }, 250);
     });
+    after(function() {
+      fs.unlinkSync(archive.paths.archivedSites+"/www.example.com");
+      fs.unlinkSync(archive.paths.archivedSites+"/www.google.com");
+    })
   });
 });
 
