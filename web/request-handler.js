@@ -55,7 +55,6 @@ var checkSitesAndArchive = function(method, response, pathName, callback) {
       // is it in sites.txt?
       archive.isUrlInList(pathName, function(found) {
         if (found) {
-          console.log('url found in txt file');
           // serve loading
           if (method==='GET') {
             httpHelpers.serveAssets(response, path.join(archive.paths.siteAssets, 'loading.html'));
@@ -75,7 +74,7 @@ exports.handleRequest = function (req, res) {
   // req.method, req.url
   //We want to check the request url and make sure it is correct.
   if (req.method === "GET") {
-    var pathName = url.parse(req.url).pathname.toLowerCase().substr(1);
+    var pathName = url.parse(req.url).pathname.toLowerCase().substr(1); // Make lower case and remove leading '/'
     getSite(pathName, res);
   } else if (req.method === "POST") {
     saveSite(req, res);

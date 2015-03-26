@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var httpHelpers = require('../web/http-helpers');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -68,6 +69,8 @@ exports.readFromSites = function(callback){
   });
 };
 
+// Take list of urls and store them
 exports.downloadUrls = function(urlArray){
   // helps htmlfetcher.js
+  _.each(urlArray, httpHelpers.sendRequest)
 };

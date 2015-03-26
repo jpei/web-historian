@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var archive = require('../helpers/archive-helpers');
+var httpGet = require('http-request').get;
 
 exports.headers = headers = {
   "access-control-allow-origin": "*",
@@ -30,8 +31,9 @@ exports.serveAssets = function(res, asset, statusCode) {
   }
 };
 
-exports.sendRequest = function() {
-  //For htmlfetcher
+// Send a request for a page and bring it back
+exports.sendRequest = function(url) {
+  httpGet(url, path.join(archive.paths.archivedSites, url.replace(/\//g,'%2F').toLowerCase()), function(err,data) {});
 };
 
 exports.sendRedirect = function(res, path) {
