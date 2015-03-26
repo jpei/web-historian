@@ -25,17 +25,49 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(){
+exports.readListOfUrls = function(callback){
+  // reads from sites.txt, returns an array
+  exports.readFromSites(function(data) {
+    var array = (''+data).split('\n');
+    if (array[array.length]==='') {
+      array.pop();
+    }
+    callback(array);
+  });
 };
 
-exports.isUrlInList = function(){
+exports.isUrlInList = function(url, callback){
+  exports.readListOfUrls(function(array){
+    var found = false;
+    for (var i = 0; i < array.length; i++){
+      if (array[i] === url){
+        found = true;
+        break;
+      }
+    }
+    callback(found);
+  });
 };
 
-exports.addUrlToList = function(){
+exports.addUrlToList = function(url, done){
+  fs.appendFile(exports.paths.list, url+'\n', function(err){
+    if (err) throw err;
+    done();
+  });
 };
 
-exports.isUrlArchived = function(){
+exports.isUrlArchived = function(url, callback){
+  var filePath = path.join(exports.paths.archivedSites, url.replace(/\//g,'%2F')).toLowerCase(); // Replaces '/'s with %2F since '/' is not a legal filename character
+  fs.exists(filePath, callback);
 };
 
-exports.downloadUrls = function(){
+exports.readFromSites = function(callback){
+  fs.readFile(exports.paths.list, function(err, data){
+    if (err) throw err;
+    callback(data); 
+  });
+};
+
+exports.downloadUrls = function(urlArray){
+  
 };
