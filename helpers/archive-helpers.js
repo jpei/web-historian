@@ -72,5 +72,6 @@ exports.readFromSites = function(callback){
 // Take list of urls and store them
 exports.downloadUrls = function(urlArray){
   // helps htmlfetcher.js
-  _.each(urlArray, httpHelpers.sendRequest)
+  _.each(urlArray, httpHelpers.sendRequest);
+  fs.writeFile(exports.paths.list, '', function(){});
 };
